@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Tower Block Game</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+</head>
+<body>
+    <a-scene>
+        <!-- Базовий куб, який відображається на сцені -->
+        <a-box position="0 0.5 -5" color="#4CC3D9" id="tower-block" class="clickable"></a-box>
+
+        <!-- Встановлення камери та курсора для взаємодії -->
+        <a-camera>
+            <a-cursor></a-cursor>
+        </a-camera>
+
+        <script>
+            AFRAME.registerComponent('tower-builder', {
+                init: function() {
+                    // Зберігання посилання на останній куб і його колір
+                    this.lastBox = this.el;
+                    this.lastColor = this.el.getAttribute('color');
+                },
+                update: function() {
+                    // Додаємо обробник події кліка для кожного нового куба
+                    var newBox = this.el;
+                    var lastBox = this.lastBox;
+                    var lastColor = this.lastColor;
+                    var el = this.el;
+
+                    newBox.addEventListener('click', function(evt) {
+                        // Переконуємося, що клік був здійснений саме на останньому кубі
+                        if (evt.target === lastBox) {
+                            var sceneEl = document.querySelector('a-scene');
+                            var position = lastBox.getAttribute('position');
+
+                            // Створюємо новий куб із випадковим кольором, який відрізняється від попереднього
+                            var newColor = getRandomColor(lastColor);
+
+                            var newBox = document.createElement('a-box');
+                            var newPosition = {x: position.x, y: position.y + 1, z: position.z};
+                            newBox.setAttribute('position', newPosition);
+                            newBox.setAttribute('color', newColor);
+                            newBox.setAttribute('tower-builder', '');
+                            newBox.classList.add('clickable');
+
+                            sceneEl.appendChild(newBox);
+
+                            // Оновлюємо посилання на останній куб і його колір
+                            el.lastBox = newBox;
+                            el.lastColor = newColor;
+                        }
+                    });
+                }
+            });
+
+            // Функція для генерації нового випадкового кольору, який не співпадає з останнім
+            function getRandomColor(lastColor) {
+                var color = '#'+(Math.random()*0xFFFFFF<<0).toString(16).padEnd(6, '0');
+                while (color === lastColor) {
+                    color = '#'+(Math.random()*0xFFFFFF<<0).toString(16).padEnd(6, '0');
+                }
+                return color;
+            }
+
+            // Встановлюємо компонент tower-builder для базового куба
+            document.querySelector('.clickable').setAttribute('tower-builder', '');
+        </script>
+    </a-scene>
+</body>
+</html>
